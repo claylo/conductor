@@ -2,7 +2,7 @@
     "name":     "conductor/conductor",
     "type":     "composer-installer",
     "license":  "MIT",
-    "keywords": ["composer", "scripts", "installer"]
+    "keywords": ["composer", "scripts", "installer"],
     "homepage": "http://conductor.claylo.com",
     "authors": [
         {
