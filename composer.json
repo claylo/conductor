@@ -1,0 +1,27 @@
+{
+    "name":     "conductor/conductor",
+    "type":     "composer-installer",
+    "license":  "MIT",
+    "keywords": ["composer", "scripts", "installer"]
+    "homepage": "http://conductor.claylo.com",
+    "authors": [
+        {
+            "name": "Clay Loveless",
+            "email": "clay@php.net",
+            "homepage": "http://claylo.com/"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.2"
+    },
+    "autoload": {
+        "psr-0": {
+            "Conductor": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
+}
