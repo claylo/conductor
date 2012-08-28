@@ -1,17 +1,13 @@
-Conductor
-=========
-
-Set of tools surrounding composer-installed packages.
-
-## PEAR Package Conversion
-
-The Package2XmlToComposer class can read most of a package2.xml file 
-and generate a valid, readable composer.json file from it.
-
-
-
-## Example Conversion
-```php
+<?php
+/**
+ * 
+ * This is a sample converter that I created using the Conductor classes to
+ * make PHPUnit more composer-friendly. You'll notice a number of a features
+ * used below might be helpful for other PEAR-centric packages.
+ * 
+ */
+error_reporting(E_ALL);
+ini_set('display_errors', true);
 require_once 'Conductor/Util/PEARPackageFilev2.php';
 require_once 'Conductor/Converter/Package2XmlToComposer.php';
 use Conductor\Converter\Package2XmlToComposer;
@@ -64,4 +60,3 @@ $converter
 //$converter->convert(true);
 
 echo $converter->convert();
-```

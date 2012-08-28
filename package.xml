@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package version="2.0"
+    xmlns="http://pear.php.net/dtd/package-2.0"
+    xmlns:tasks="http://pear.php.net/dtd/tasks-1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+                      http://pear.php.net/dtd/tasks-1.0.xsd
+                      http://pear.php.net/dtd/package-2.0
+                      http://pear.php.net/dtd/package-2.0.xsd">
+    <name>Conductor</name>
+    <channel>pear.claylo.com</channel>
+    <summary>Composer installer-related tools</summary>
+    <description>Composer installer-related tools</description>
+    <lead>
+        <name>Clay Loveless</name>
+        <user>clay</user>
+        <email>clay@php.net</email>
+        <active>yes</active>
+    </lead>
+    <date>2012-08-28</date>
+    <version>
+        <release>1.0.0</release>
+        <api>1.0.0</api>
+    </version>
+    <stability>
+        <release>stable</release>
+        <api>stable</api>
+    </stability>
+    <license>MIT</license>
+    <notes>http://github.com/claylo/conductor/blob/master/ChangeLog.md</notes>
+    <contents>
+        <dir name="/">
+            <dir name="Conductor">
+                <dir name="Converter">
+                    <file name="Package2XmlToComposer.php" role="php" />
+                </dir>
+                <dir name="Util">
+                    <file name="PEARPackageFilev2.php" role="php" />
+                </dir>
+                <file name="ScriptInstaller.php" role="php" />
+            </dir>
+            <dir name="examples">
+                <dir name="conversion">
+                    <dir name="PHPUnit">
+                        <file name="create_composer.php" role="doc" />
+                        <file name="package.xml" role="doc" />
+                    </dir>
+                </dir>
+            </dir>
+            <file name="ChangeLog.md" role="doc" />
+            <file name="README.md" role="doc" />
+        </dir>
+    </contents>
+    <dependencies>
+        <required>
+            <php>
+                <min>5.3.3</min>
+            </php>
+            <pearinstaller>
+                <min>1.9.4</min>
+            </pearinstaller>
+            <extension>
+                <name>xmlreader</name>
+            </extension>
+        </required>
+    </dependencies>
+    <phprelease/>
+</package>
