@@ -18,13 +18,165 @@ class Package2XmlToComposer
     protected $_autoload = array();
     protected $_include_path = array();
     protected $_bin_files;
+    protected $_config;
+    public $output_file = true;
+    protected $_package2file_path;
     
-    public function __construct($package2file)
+    public function __construct($package2file, $config = null)
     {
         if (! file_exists($package2file)) {
             throw new \RuntimeException('Could not find ' . $package2file);
         }
+        $this->_package2file_path = $packcage2file;
         $this->_xml = file_get_contents($package2file);
+        
+        if ($config !== null && file_exists($config)) {
+            $config_json = file_get_contents($config);
+            $this->_config = json_decode($config_json, true);
+            $this->_applyConfig();
+        }
+    }
+    
+    /**
+     * Apply values provided in a config JSON file.
+     * 
+     * Recognized values in JSON configuration:
+     * 
+     *   keywords 
+     *   license
+     *   homepage
+     *   dependency_map
+     *   support
+     *   autoload
+     *   include_path
+     *   bin
+     * 
+     * Non-composer.json-standard values:
+     * depedency_map:
+     * dependency_map allows mapping of PEAR package dependencies to their
+     * composer equivalents.
+     *
+     * output_path:
+     * Allows setting where composer.json should be written. Default is to 
+     * write it in the same directory as package.xml
+     * 
+     */
+    protected function _applyConfig()
+    {
+        if (empty($this->_config)) {
+            return;
+        }
+        
+        if (isset($this->_config['keywords'])) {
+            $this->setKeywords($this->_config['keywords']);
+        }
+        
+        if (isset($this->_config['license'])) {
+            $this->setLicense($this->_config['license']);
+        }
+        
+        if (isset($this->_config['homepage'])) {
+            $this->setHomepage($this->_config['homepage']);
+        }
+        
+        if (isset($this->_config['dependency_map'])) {
+            $this->setDependencyMap($this->_config['dependency_map']);
+        }
+        
+        if (isset($this->_config['support'])) {
+            $this->setSupportInfo($this->_config['support']);
+        }
+        
+        if (isset($this->_config['autoload'])) {
+            $this->setAutoload($this->_config['autoload']);
+        }
+        
+        if (isset($this->_config['include_path'])) {
+            $this->setIncludePath($this->_config['include_path']);
+        }
+        
+        if (isset($this->_config['bin'])) {
+            $this->setBinFiles($this->_config['bin']);
+        }
+        
+        if (isset($this->_config['output_path'])) {
+            $this->outputTo($this->_config['output_path']);
+        } else {
+            $package2file_dir = dirname($this->_package2file_path);
+            $package2file_dir = realpath($package2file_dir);
+            $this->outputTo($package2file_dir);
+        }
+        
+    }
+    
+    /**
+     * Help output for CLI version
+     */
+    public static function help()
+    {
+        $output = <<<EOF
+package2composer --package-file [package file] --config [config file]
+
+EOF;
+        echo $output;
+        exit();
+    }
+    
+    /**
+     * Main method that starts conversion from the command-line
+     * 
+     * 
+     */
+    public static function main()
+    {
+        $params = array(
+            'f:' => 'package-file:',
+            'c:' => 'config:',
+            'h' => 'help'
+        );
+        $short = join('', array_keys($params));
+        $opts = getopt($short, $params);
+        
+        if (isset($opts['h']) || isset($opts['help'])) {
+            self::help();
+        }
+        
+        $config = null;
+        $package_file = null;
+        
+        if (isset($opts['c'])) {
+            $config = $opts['c'];            
+        } elseif (isset($opts['config'])) {
+            $config = $opts['config'];
+        }
+        
+        if (isset($opts['f'])) {
+            $package_file = $opts['f'];
+        } elseif (isset($opts['package-file'])) {
+            $package_file = $opts['package-file'];
+        }
+        
+        
+        if ($package_file === null) {
+            $cwd = getcwd();
+            if (file_exists($cwd . '/package.xml')) {
+                $package_file = $cwd . '/package.xml';
+            }
+        }
+        
+        if ($config === null && $package_file !== null) {
+            // check same dir as package.xml
+            $config_path = dirname($package_file);
+            if (file_exists($config_path.'/package-composer.json')) {
+                $config = $config_path.'/package-composer.json';
+            }
+        }
+        
+        $converter = new Package2XmlToComposer($package_file, $config);
+        $ret = $converter->convert();
+        if ($converter->output_file === null) {
+            echo $ret;
+        }
     }
     
     /**
@@ -165,12 +317,42 @@ class Package2XmlToComposer
         return $this;
     }
     
-        
+    /**
+     * Allow retrieval of parsed data structure.
+     * 
+     * @return array
+     */
+    public function getParsedPackageData()
+    {
+        return $this->_data;
+    }
+    
+    /**
+     * Allow setting of the output path location
+     * 
+     * @param string $output_path The DIRECTORY to write composer.json into
+     */
+    public function outputTo($output_path)
+    {
+        $output_path = rtrim($output_path, '/');
+        if (is_dir($output_path) && is_writable($output_path)) {
+            $this->output_file = $output_path . '/composer.json';
+        }
+        return $this;
+    }
+    
+    /**
+     * 
+     */
     public function convert($output_file = null)
     {
         $pv2 = new PEARPackageFilev2($this->_xml);
         $data = $pv2->parse();
         $this->_data = $data;
+        
+        if (empty($this->output_file) && ! empty($output_file)) {
+            $this->output_file = $output_file;
+        }
         
         if (empty($this->_name) && isset($data['channel'])) {
             $suggested_alias = $this->_getChannelSuggestedAlias($data['channel']);
@@ -353,13 +535,13 @@ class Package2XmlToComposer
         $j = rtrim($j, ",\n") . "\n";
         $j .= "}\n";
         
-        if ($output_file === null) {
+        if ($this->output_file === false) {
             return $j;
-        } elseif ($output_file === true) {
+        } elseif ($this->output_file === true) {
             $cwd = getcwd();
             file_put_contents($cwd.'/composer.json', $j);
         } else {
-            file_put_contents($output_file, $j);
+            file_put_contents($this->output_file, $j);
         }
     }
     

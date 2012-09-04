@@ -17,9 +17,9 @@
         <email>clay@php.net</email>
         <active>yes</active>
     </lead>
-    <date>2012-08-28</date>
+    <date>2012-09-04</date>
     <version>
-        <release>1.0.0</release>
+        <release>1.0.1</release>
         <api>1.0.0</api>
     </version>
     <stability>
@@ -37,6 +37,7 @@
                 <dir name="Util">
                     <file name="PEARPackageFilev2.php" role="php" />
                 </dir>
+                <file name="Autoload.php" role="php" />
                 <file name="ScriptInstaller.php" role="php" />
             </dir>
             <dir name="examples">
@@ -47,6 +48,10 @@
                     </dir>
                 </dir>
             </dir>
+            <file name="package2composer.php" role="script">
+                <tasks:replace from="/usr/bin/env php" to="php_bin" type="pear-config"/>
+                <tasks:replace from="@php_dir@" to="php_dir" type="pear-config"/>
+            </file>
             <file name="ChangeLog.md" role="doc" />
             <file name="README.md" role="doc" />
         </dir>
@@ -64,5 +69,9 @@
             </extension>
         </required>
     </dependencies>
-    <phprelease/>
+    <phprelease>
+        <filelist>
+            <install as="package2composer" name="package2composer.php" />
+        </filelist>
+    </phprelease>
 </package>
