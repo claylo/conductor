@@ -13,8 +13,12 @@ class BootstrapSymfonyStandard
 {
     public static function postInstall(Event $event)
     {
-        $vendor_dir = $event->getComposer()->getConfig()->get('vendor-dir');
-        dirname($vendor_dir);
-        echo "install root: $vendor_dir\n";
+        $package = $event->getComposer()->getPackage();
+        $install_path = $event
+                            ->getComposer()
+                            ->getInstallationManager()
+                            ->getInstallPath($package);
+
+        echo "install path: $install_path\n";
     }
 }
