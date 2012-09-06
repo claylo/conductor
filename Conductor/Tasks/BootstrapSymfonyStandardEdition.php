@@ -32,7 +32,7 @@ class BootstrapSymfonyStandardEdition
             $install_path
         );
         
-        static::installSymfonyStandard($install_path);
+        static::installSymfonyStandardEdition($install_path);
     }
     
     /**
