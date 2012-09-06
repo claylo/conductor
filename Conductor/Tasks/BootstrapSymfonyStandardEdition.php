@@ -8,6 +8,8 @@
 namespace Conductor\Tasks;
 
 use Composer\Script\Event;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Exception\IOException;
 
 class BootstrapSymfonyStandardEdition
 {
@@ -33,8 +35,15 @@ class BootstrapSymfonyStandardEdition
         static::installSymfonyStandard($install_path);
     }
     
+    /**
+     * Copy over the necessary files from the framework-standard-edition,
+     * only if the directories are non-existent.
+     */
     protected static function installSymfonyStandardEdition($top_level)
     {
+        $fs = new Filesystem();
+        $io = static::$event->getIO();
+        
         $vendor_dir = static::$event->getComposer()->getConfig()->get('vendor-dir');
         
         $standard_dir = $top_level 
@@ -50,6 +59,36 @@ class BootstrapSymfonyStandardEdition
             return;
         }
         
+        /**
+         * use symfony-tuned .gitignore?
+         */
+        if (! file_exists($top_level . DIRECTORY_SEPARATOR . '.gitignore')) {
+            try {
+                $fs->copy(
+                    $standard_dir . DIRECTORY_SEPARATOR . '.gitignore',
+                    $top_level . DIRECTORY_SEPARATOR . '.gitignore'
+                );
+            } catch (IOException $e) {
+                $io->write('<comment>'.__METHOD__.': '.$e->getMessage().'</comment>');
+            }
+        }
         
+        /**
+         * Full copy of app, src, web dirs?
+         */
+        $to_mirror = array('app', 'src', 'web');
+        foreach ($to_mirror as $dir) {
+            if (! is_dir($top_level . DIRECTORY_SEPARATOR . $dir) {
+                try {
+                    $fs->mirror(
+                        $standard_dir . DIRECTORY_SEPARATOR . $dir,
+                        $top_level . DIRECTORY_SEPARATOR . $dir
+                    );
+                } catch (IOException $e) {
+                    $io->write('<comment>'.__METHOD__.': '.$e->getMessage().'</comment>');
+                }
+            }
+        }
+
     }
 }
