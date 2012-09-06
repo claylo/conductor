@@ -3,7 +3,7 @@
  * This file is part of the Conductor package.
  *
  * Generated using:
- * phpab --var namespace=Cool --template Cool/Autoload.php.in --output Cool/Autoload.php Cool
+ * phpab --var namespace=Conductor --template Conductor/Autoload.php.in --output Conductor/Autoload.php Conductor
  * 
  * @copyright 2012 Clay Loveless <clay@php.net>
  * @license   http://opensource.org/licenses/MIT MIT License
@@ -39,10 +39,13 @@ class Autoload
      */
     public static function load($class)
     {
+    
         if (empty(self::$classes)) {
             self::$classes = array(
+                'conductor\\autoload' => '/Autoload.php',
                 'conductor\\converter\\package2xmltocomposer' => '/Converter/Package2XmlToComposer.php',
                 'conductor\\scriptinstaller' => '/ScriptInstaller.php',
+                'conductor\\tasks\\bootstrapsymfonystandardedition' => '/Tasks/BootstrapSymfonyStandardEdition.php',
                 'conductor\\util\\pearpackagefilev2' => '/Util/PEARPackageFilev2.php'
             );
         }
