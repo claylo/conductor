@@ -59,6 +59,8 @@ class BootstrapSymfonyStandardEdition
             return;
         }
         
+        $io->write('<info>Installing Symfony Standard Edition files</info>');
+        
         /**
          * use symfony-tuned .gitignore?
          */
@@ -68,9 +70,12 @@ class BootstrapSymfonyStandardEdition
                     $standard_dir . DIRECTORY_SEPARATOR . '.gitignore',
                     $top_level . DIRECTORY_SEPARATOR . '.gitignore'
                 );
+                $io->write('<comment> - Symfony .gitignore copied</comment>');
             } catch (IOException $e) {
                 $io->write('<comment>'.__METHOD__.': '.$e->getMessage().'</comment>');
             }
+        } else {
+            $io->write('<comment> - Symfony .gitignore SKIPPED</comment>');
         }
         
         /**
@@ -84,9 +89,12 @@ class BootstrapSymfonyStandardEdition
                         $standard_dir . DIRECTORY_SEPARATOR . $dir,
                         $top_level . DIRECTORY_SEPARATOR . $dir
                     );
+                    $io->write('<comment> - '.$dir.'/ installed</comment>');
                 } catch (IOException $e) {
                     $io->write('<comment>'.__METHOD__.': '.$e->getMessage().'</comment>');
                 }
+            } else {
+                $io->write('<comment> - '.$dir.'/ already exists, skipping</comment>');
             }
         }
 
