@@ -1,6 +1,7 @@
 {
     "name":     "conductor/conductor",
     "type":     "composer-installer",
+    "description": "Composer installer-related tools",
     "license":  "MIT",
     "keywords": ["composer", "scripts", "installer"],
     "homepage": "http://conductor.claylo.com",
@@ -25,7 +26,7 @@
             "dev-master": "1.0-dev"
         }
     },
-    "bin": {
+    "bin": [
         "package2composer.php"
-    }
+    ]
 }
