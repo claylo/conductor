@@ -4,7 +4,7 @@
     "description": "Composer installer-related tools",
     "license":  "MIT",
     "keywords": ["composer", "scripts", "installer"],
-    "homepage": "http://conductor.claylo.com",
+    "homepage": "https://github.com/claylo/conductor",
     "authors": [
         {
             "name": "Clay Loveless",
