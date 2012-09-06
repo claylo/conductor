@@ -78,7 +78,7 @@ class BootstrapSymfonyStandardEdition
          */
         $to_mirror = array('app', 'src', 'web');
         foreach ($to_mirror as $dir) {
-            if (! is_dir($top_level . DIRECTORY_SEPARATOR . $dir) {
+            if (! is_dir($top_level . DIRECTORY_SEPARATOR . $dir)) {
                 try {
                     $fs->mirror(
                         $standard_dir . DIRECTORY_SEPARATOR . $dir,
