@@ -9,10 +9,14 @@ namespace Conductor\Tasks;
 
 use Composer\Script\Event;
 
-class BootstrapSymfonyStandard
+class BootstrapSymfonyStandardEdition
 {
+    protected static $event;
+    
     public static function postInstall(Event $event)
     {
+        static::$event = $event;
+        
         $package = $event->getComposer()->getPackage();
         $vendor_dir = $event->getComposer()->getConfig()->get('vendor-dir');
         $install_path = $event
@@ -25,10 +29,27 @@ class BootstrapSymfonyStandard
             '',
             $install_path
         );
-        echo "install path v1: $install_path\n";
         
-        // Works, but hacky
-        $install_path = realpath(__DIR__ . '/../../../../../');
-        echo "install path v2: $install_path\n";
+        static::installSymfonyStandard($install_path);
+    }
+    
+    protected static function installSymfonyStandardEdition($top_level)
+    {
+        $vendor_dir = static::$event->getComposer()->getConfig()->get('vendor-dir');
+        
+        $standard_dir = $top_level 
+                           . DIRECTORY_SEPARATOR 
+                           . $vendor_dir
+                           . DIRECTORY_SEPARATOR
+                           . 'symfony'
+                           . DIRECTORY_SEPARATOR
+                           . 'framework-standard-edition';
+                                   
+        if (! is_dir($standard_dir)) {
+            // didn't get it, so do nothing
+            return;
+        }
+        
+        
     }
 }
