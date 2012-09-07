@@ -78,6 +78,7 @@ class BootstrapSymfonyStandardEdition
                            . 'framework-standard-edition';
                                    
         if (! is_dir($standard_dir)) {
+            $io->write('<error>'.__METHOD__.": $standard_dir not found, can't set up Symfony Standard Edition</error>");
             // didn't get it, so do nothing
             return;
         }
