@@ -16,6 +16,9 @@
         "php": ">=5.3.2",
         "symfony/filesystem": "2.1.*"
     },
+    "suggest": {
+        "symfony/framework-standard-edition": "Required to make use of the Conductor\\Tasks\\BootstrapSymfonyStandardEdition task."
+    },
     "autoload": {
         "psr-0": {
             "Conductor": ""

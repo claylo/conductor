@@ -23,6 +23,7 @@ To install a customized Symfony that's set up how you want it right out of
     ...
     "require": {
         ...
+        "symfony/framework-standard-edition": "*",
         "conductor/conductor": "1.0.*"
     },
     ...
@@ -35,13 +36,16 @@ To install a customized Symfony that's set up how you want it right out of
     },
     ...
     "repositories": [
+        { "type": "git", "url": "http://github.com/symfony/symfony-standard.git" },
         { "type": "git", "url": "http://github.com/claylo/conductor.git" }
     ]
 }
 ```
 
 This approach assumes that you've based your custom setup off of 
-Symfony Standard Edition's [base `composer.json`](https://github.com/symfony/symfony-standard/blob/master/composer.json).
+Symfony Standard Edition's [base `composer.json`](https://github.com/symfony/symfony-standard/blob/master/composer.json),
+_and_ that you've also included a requirement for the Symfony Standard package
+itself.
 
 **NOTE:** The `"Conductor\\Tasks\\BootstrapSymfonyStandardEdition::postInstall"` command
 needs to be the _first_ `post-install-cmd`, as the others are dependent on the work
