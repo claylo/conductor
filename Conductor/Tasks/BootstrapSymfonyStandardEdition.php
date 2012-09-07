@@ -42,18 +42,8 @@ class BootstrapSymfonyStandardEdition
     {
         static::$event = $event;
         
-        $package = $event->getComposer()->getPackage();
-        $vendor_dir = $event->getComposer()->getConfig()->get('vendor-dir');
-        $install_path = $event
-                            ->getComposer()
-                            ->getInstallationManager()
-                            ->getInstallPath($package);
-
-        $install_path = str_replace(
-            DIRECTORY_SEPARATOR . $vendor_dir . DIRECTORY_SEPARATOR . $package->getName(),
-            '',
-            $install_path
-        );
+        // hacky but reliable        
+        $install_path = realpath(__DIR__ . '/../../../../../');
         
         static::installSymfonyStandardEdition($install_path);
     }
