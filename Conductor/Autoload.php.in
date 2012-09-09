@@ -6,7 +6,7 @@
  * phpab --var namespace=___namespace___ --template ___namespace___/Autoload.php.in --output ___namespace___/Autoload.php ___namespace___
  * 
  * @copyright 2012 Clay Loveless <clay@php.net>
- * @license   http://opensource.org/licenses/MIT MIT License
+ * @license   http://claylo.mit-license.org/2012/ MIT License
  */
 namespace ___namespace___;
 

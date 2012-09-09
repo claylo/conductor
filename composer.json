@@ -19,6 +19,10 @@
     "suggest": {
         "symfony/framework-standard-edition": "Required to make use of the Conductor\\Tasks\\BootstrapSymfonyStandardEdition task."
     },
+    "support": {
+        "issues": "https://github.com/claylo/conductor/issues",
+        "twitter": "@claylo"
+    },
     "autoload": {
         "psr-0": {
             "Conductor": ""

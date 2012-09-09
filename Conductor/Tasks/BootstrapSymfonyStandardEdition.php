@@ -3,7 +3,7 @@
  * This file is part of Conductor
  *
  * @copyright 2012 Clay Loveless <clay@php.net>
- * @license   http://opensource.org/licenses/MIT MIT License
+ * @license   http://claylo.mit-license.org/2012/ MIT License
  */
 namespace Conductor\Tasks;
 

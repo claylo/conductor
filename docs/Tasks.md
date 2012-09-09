@@ -50,3 +50,28 @@ itself.
 **NOTE:** The `"Conductor\\Tasks\\BootstrapSymfonyStandardEdition::postInstall"` command
 needs to be the _first_ `post-install-cmd`, as the others are dependent on the work
 that it does.
+
+## What's wrong with composer create-project?
+
+For many things, nothing. 
+
+However, after a few of these, and a while spent on creating a Satis repo just
+for a customized installation, it's just not worth it for me. 
+
+```
+clay:test clay$ composer create-project --dev --prefer-source symfony/framework-standard-edition test-project 
+Installing symfony/framework-standard-edition (dev-master 506ffaab8d8474db2512fca879ca4b9877616a1e)
+  - Installing symfony/framework-standard-edition (dev-master master)
+    Cloning master
+
+Created project in test-project
+Loading composer repositories with package information
+Installing dependencies from lock file
+Your lock file is out of sync with your composer.json, run "composer.phar update" to update dependencies
+Your requirements could not be resolved to an installable set of packages.
+
+  Problem 1
+    - Installation request for symfony/symfony == 2.1.9999999.9999999-dev -> satisfiable by symfony/symfony 2.1.x-dev.
+    - Can only install one of: symfony/symfony dev-master, symfony/symfony 2.1.x-dev.
+    - Installation request for symfony/symfony == 9999999-dev -> satisfiable by symfony/symfony dev-master.
+```

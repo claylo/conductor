@@ -5,8 +5,7 @@ Set of tools surrounding composer-installed packages.
 
 ## PEAR Package Conversion
 
-The Package2XmlToComposer class can read most of a package2.xml file 
-and generate a valid, readable composer.json file from it.
+The Package2XmlToComposer class can read most of a package2.xml file and generate a valid, readable composer.json file from it.
 
 
 

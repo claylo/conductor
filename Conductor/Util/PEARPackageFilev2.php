@@ -1,4 +1,10 @@
 <?php
+/**
+ * This file is part of Conductor
+ *
+ * @copyright 2012 Clay Loveless <clay@php.net>
+ * @license   http://claylo.mit-license.org/2012/ MIT License
+ */
 namespace Conductor\Util;
 
 class PEARPackageFilev2

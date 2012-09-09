@@ -1,8 +1,34 @@
 <?php
+/**
+ * This file is part of Conductor
+ *
+ * @copyright 2012 Clay Loveless <clay@php.net>
+ * @license   http://claylo.mit-license.org/2012/ MIT License
+ */
 namespace Conductor\Converter;
 
 use Conductor\Util\PEARPackageFilev2;
 
+/**
+ * Read a package.xml file (version 2.0) and convert it to a composer.json
+ * file. 
+ * 
+ * Elements not typically found in package.xml files can be set (or 
+ * overridden) using methods or a config JSON file.
+ * 
+ * Yes, some of this capability is present in Composer itself, given 
+ * Composer's ability to install PEAR packages. However, Composer relies on 
+ * PEAR channels, meaning using Composer's classes for this capability would 
+ * require developers supporting PEAR and Composer to first publish their 
+ * packages to their channel and then generate composer.json files 
+ * afterwards.
+ * 
+ * Using this class, and in particular, the package2composer script that
+ * leverages this class, developers are able to use the package.xml file 
+ * they're using with PEAR's package command to generate a composer.json, 
+ * which allows a one-stage release workflow to be scripted.
+ * 
+ */
 class Package2XmlToComposer
 {
     protected $_xml;
@@ -14,6 +40,7 @@ class Package2XmlToComposer
     protected $_license;
     protected $_homepage;
     protected $_dependency_map = array();
+    protected $_extra_suggestions = array();
     protected $_support = array();
     protected $_autoload = array();
     protected $_include_path = array();
@@ -67,6 +94,10 @@ class Package2XmlToComposer
             return;
         }
         
+        if (isset($this->_config['name'])) {
+            $this->setName($this->_config['name']);
+        }
+
         if (isset($this->_config['keywords'])) {
             $this->setKeywords($this->_config['keywords']);
         }
@@ -81,6 +112,10 @@ class Package2XmlToComposer
         
         if (isset($this->_config['dependency_map'])) {
             $this->setDependencyMap($this->_config['dependency_map']);
+        }
+
+        if (isset($this->_config['extra_suggestions'])) {
+            $this->setExtraSuggestions($this->_config['extra_suggestions']);
         }
         
         if (isset($this->_config['support'])) {
@@ -279,6 +314,19 @@ EOF;
         $this->_dependency_map = (array) $map;
         return $this;
     }
+
+    /**
+     * Set extra suggestions for features, beyond what is mentioned in
+     * package.xml
+     * 
+     * @param array $suggestions
+     * @return self
+     */
+    public function setExtraSuggestions($suggestions)
+    {
+        $this->_extra_suggestions = (array) $suggestions;
+        return $this;
+    }
     
     /**
      * Set up any autoload configuration necessary
@@ -347,16 +395,22 @@ EOF;
     public function convert($output_file = null)
     {
         $pv2 = new PEARPackageFilev2($this->_xml);
-        $data = $pv2->parse();
-        $this->_data = $data;
+        $this->_data = $pv2->parse();
+        
+        if (! empty($this->_extra_suggestions)) {
+            $this->_data['dependencies']['optional'] = array_merge(
+                $this->_data['dependencies']['optional'],
+                $this->_extra_suggestions
+            );
+        }
         
         if (empty($this->output_file) && ! empty($output_file)) {
             $this->output_file = $output_file;
         }
         
-        if (empty($this->_name) && isset($data['channel'])) {
-            $suggested_alias = $this->_getChannelSuggestedAlias($data['channel']);
-            $pkgname = strtolower($data['name']);
+        if (empty($this->_name) && isset($this->_data['channel'])) {
+            $suggested_alias = $this->_getChannelSuggestedAlias($this->_data['channel']);
+            $pkgname = strtolower($this->_data['name']);
             $pkgname = str_replace('_', '-', $pkgname);
             $this->_name = strtolower($suggested_alias . '/' . $pkgname);
         }
@@ -367,8 +421,8 @@ EOF;
         $j .= $tab . '"name": "' . $this->_name . "\",\n";
 
         // short package.xml summaries are what composer means for descriptions
-        if (isset($data['summary'])) {
-            $j .= $tab . '"description": "'. $data['summary'] . "\",\n";
+        if (isset($this->_data['summary'])) {
+            $j .= $tab . '"description": "'. $this->_data['summary'] . "\",\n";
         }
 
         if (! empty($this->_type)) {
@@ -386,23 +440,23 @@ EOF;
 
         if (! empty($this->_homepage)) {
             $homepage = $this->_homepage;
-        } elseif (isset($data['channel'])) {
-            $homepage = 'http://' . $data['channel'];
+        } elseif (isset($this->_data['channel'])) {
+            $homepage = 'http://' . $this->_data['channel'];
         }
         $j .= $tab . '"homepage": "'.$homepage."\",\n";
         
         if (! empty($this->_license)) {
             $license = $this->_license;
-        } elseif (isset($data['license']['type'])) {
-            $license = $data['license']['type'];
+        } elseif (isset($this->_data['license']['type'])) {
+            $license = $this->_data['license']['type'];
         }
         $j .= $tab . '"license": "'.$license."\",\n";
         
         $j .= $tab . '"authors": [' . "\n";
         $author_types = array('lead', 'developer', 'contributor', 'helper');
         foreach ($author_types as $atype) {
-            if (! empty($data[$atype])) {
-                foreach ($data[$atype] as $dev) {
+            if (! empty($this->_data[$atype])) {
+                foreach ($this->_data[$atype] as $dev) {
                     $j .= $tab . $tab . "{\n";
                     if (! empty($dev['name'])) {
                         $j .= $tab . $tab . $tab . "\"name\": \"{$dev['name']}\",\n";
@@ -418,11 +472,11 @@ EOF;
         }
         $j .= $tab . "],\n";
 
-        if (isset($data['version']['release'])) {
-            $j .= $tab . '"version": "'. $data['version']['release'] . "\",\n";
+        if (isset($this->_data['version']['release'])) {
+            $j .= $tab . '"version": "'. $this->_data['version']['release'] . "\",\n";
         }
-        if (isset($data['date'])) {
-            $j .= $tab . '"time": "'. $data['date'] . "\",\n";
+        if (isset($this->_data['date'])) {
+            $j .= $tab . '"time": "'. $this->_data['date'] . "\",\n";
         }
 
         if (! empty($this->_support)) {
@@ -438,9 +492,9 @@ EOF;
         // requirements
         $deptypes = array('required' => 'require', 'optional' => 'suggest');
         foreach ($deptypes as $pear_deptype => $composer_deptype) {
-            if (! empty($data['dependencies'][$pear_deptype])) {
+            if (! empty($this->_data['dependencies'][$pear_deptype])) {
                 $j .= $tab . "\"{$composer_deptype}\": {\n";
-                foreach ($data['dependencies'][$pear_deptype] as $req) {
+                foreach ($this->_data['dependencies'][$pear_deptype] as $req) {
                     if ($req['dep'] == 'pearinstaller') {
                         continue;
                     }
@@ -458,7 +512,7 @@ EOF;
                         if (isset($req['channel'])) {
                             $reqkey .= $req['channel'];
                         } else {
-                            $reqkey .= $data['channel'];
+                            $reqkey .= $this->_data['channel'];
                         }
                         $reqkey .= '/' . $req['name'];
                         if (isset($this->_dependency_map[$reqkey])) {
@@ -473,13 +527,8 @@ EOF;
                 $j = rtrim($j, ",\n") . "\n"; 
                 $j .= $tab . "},\n";
             }
-//            $j = rtrim($j, ",\n") . "\n"; 
         }
         
-        // some defaults
-        $j .= $tab . "\"config\": {\n";
-        $j .= $tab . $tab . "\"bin-dir\": \"bin\"\n";
-        $j .= $tab . "},\n";
         
         if (! empty($this->_bin_files)) {
             $j .= $tab . "\"bin\": [\n";
@@ -488,6 +537,11 @@ EOF;
             }
             $j = rtrim($j, ",\n") . "\n";
             $j .= $tab . "],\n";
+            
+            
+            $j .= $tab . "\"config\": {\n";
+            $j .= $tab . $tab . "\"bin-dir\": \"bin\"\n";
+            $j .= $tab . "},\n";
         }
         
         if (! empty($this->_autoload)) {

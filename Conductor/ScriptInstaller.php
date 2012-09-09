@@ -1,11 +1,9 @@
 <?php
 /**
- * This file is part of Conductor.
+ * This file is part of Conductor
  *
- * (c) Clay Loveless <clay@php.net>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * @copyright 2012 Clay Loveless <clay@php.net>
+ * @license   http://claylo.mit-license.org/2012/ MIT License
  */
 namespace Conductor;
 
