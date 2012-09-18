@@ -10,7 +10,7 @@ namespace Conductor\Util;
 class PEARPackageFilev2
 {
     protected $xml = null;
-    
+
     protected $info = array(
         'package_version' => '2.0',
         'name'          => null,
@@ -45,13 +45,13 @@ class PEARPackageFilev2
         'compatible'    => array(),
         'phprelease'    => array()
     );
-    
+
     public function __construct($xml_string)
     {
         $this->xml = new \XMLReader();
         $this->xml->XML($xml_string);
     }
-    
+
     public function parse()
     {
         $r = $this->xml;
@@ -62,13 +62,12 @@ class PEARPackageFilev2
         if ($version != '2.0') {
             throw new \RuntimeException("can't read package versions other than 2.0");
         }
-        
-        
+
+
         while ($r->read()) {
             if ($r->nodeType == \XMLReader::ELEMENT && $r->depth == 1) {
-                
+
                 switch ($r->localName) {
-                    
                     case 'channel':
                     case 'uri':
                     case 'extends':
@@ -76,75 +75,67 @@ class PEARPackageFilev2
                     case 'summary':
                     case 'description':
                     case 'date':
-                    case 'notes':                        
-                        $this->info[$r->localName] = $this->_getValue();
+                    case 'notes':
+                        $this->info[$r->localName] = $this->getValue();
                         break;
-                    
                     case 'license':
-                        $this->_parseLicense();
+                        $this->parseLicense();
                         break;
-                    
                     case 'lead':
                     case 'developer':
                     case 'contributor':
                     case 'helper':
                         $this->info[$r->localName][] = $this->_getPerson($r->localName);
                         break;
-                    
                     case 'version':
                     case 'stability':
-                        $this->_parseVersionAndStability($r->localName);
+                        $this->parseVersionAndStability($r->localName);
                         break;
-                    
                     case 'contents':
-                        $this->_parseContents();
+                        $this->parseContents();
                         break;
-                        
                     case 'dependencies':
-                        $this->_parseDeps();
+                        $this->parseDeps();
                         break;
-                    
-                    // <extsrcrelease>, <extbinrelease> and <bundle> not 
+                    // <extsrcrelease>, <extbinrelease> and <bundle> not
                     // currently supported.
                     case 'phprelease':
-                        $this->_parsePhpRelease();
+                        $this->parsePhpRelease();
                         break;
-                        
                     default:
                         //...
                 }
-                
+
             }
-            
+
 
         }
         return $this->info;
     }
-    
-    protected function _getValue()
+
+    protected function getValue()
     {
         $this->xml->read();
         $val = $this->xml->value;
-        //$this->xml->read();
         return $val;
     }
-    
-    protected function _getPerson($element)
+
+    protected function getPerson($element)
     {
         $person = array();
         $r = $this->xml;
-        while($r->read()) {
+        while ($r->read()) {
             if ($r->nodeType == \XMLReader::ELEMENT && $r->localName == 'name') {
-                $person['name'] = $this->_getValue();
+                $person['name'] = $this->getValue();
             }
             if ($r->nodeType == \XMLReader::ELEMENT && $r->localName == 'user') {
-                $person['user'] = $this->_getValue();
+                $person['user'] = $this->getValue();
             }
             if ($r->nodeType == \XMLReader::ELEMENT && $r->localName == 'email') {
-                $person['email'] = $this->_getValue();
+                $person['email'] = $this->getValue();
             }
             if ($r->nodeType == \XMLReader::ELEMENT && $r->localName == 'active') {
-                $person['active'] = $this->_getValue();
+                $person['active'] = $this->getValue();
             }
             if ($r->nodeType == \XMLReader::END_ELEMENT && $r->localName == $element) {
                 break;
@@ -152,34 +143,34 @@ class PEARPackageFilev2
         }
         return $person;
     }
-        
-    protected function _parseVersionAndStability($element)
+
+    protected function parseVersionAndStability($element)
     {
         $r = $this->xml;
         while ($r->read()) {
             if ($r->nodeType == \XMLReader::ELEMENT && $r->localName == 'release') {
-                $this->info[$element]['release'] = $this->_getValue();
+                $this->info[$element]['release'] = $this->getValue();
             }
             if ($r->nodeType == \XMLReader::ELEMENT && $r->localName == 'api') {
-                $this->info[$element]['api'] = $this->_getValue();
+                $this->info[$element]['api'] = $this->getValue();
             }
             if ($r->nodeType == \XMLReader::END_ELEMENT && $r->localName == $element) {
                 break;
             }
         }
     }
-    
-    protected function _parseLicense()
+
+    protected function parseLicense()
     {
         $r = $this->xml;
         if ($r->hasAttributes) {
             $this->info['license']['uri'] = $r->getAttribute('uri');
             $this->info['license']['filesource'] = $r->getAttribute('filesource');
         }
-        $this->info['license']['type'] = $this->_getValue();
+        $this->info['license']['type'] = $this->getValue();
     }
-    
-    protected function _parseContents()
+
+    protected function parseContents()
     {
         $contents = array();
         $path = array();
@@ -198,12 +189,12 @@ class PEARPackageFilev2
                     $current_dir = '/';
                 }
             }
-            
+
             if ($r->nodeType == \XMLReader::ELEMENT) {
                 switch($r->localName) {
                     case 'dir':
                         $dirname = $r->getAttribute('name');
-                        $baseinstalldir = $r->getAttribute('baseinstalldir');                    
+                        $baseinstalldir = $r->getAttribute('baseinstalldir');
                         //echo "dir {$dirname} at {$r->depth}\n";
                         $path[$r->depth] = $dirname;
                         $current_dir = $dirname;
@@ -226,23 +217,22 @@ class PEARPackageFilev2
                         break;
                     default:
                         if ($r->prefix == 'tasks' && $r->namespaceURI == 'http://pear.php.net/dtd/tasks-1.0') {
-                            $this->_parseTask($r->localName, $current_file);
+                            $this->parseTask($r->localName, $current_file);
                         }
-                        //echo "default switch for {$r->localName} namespaceuri {$r->namespaceURI} prefix {$r->prefix}\n";
                 }
             }
             if ($r->nodeType == \XMLReader::END_ELEMENT && $r->localName == 'contents') {
                 break;
-            }            
+            }
         }
     }
-    
-    protected function _parseTask($task, $file)
+
+    protected function parseTask($task, $file)
     {
         if (! array_key_exists($file, $this->info['tasks'])) {
             $this->info['tasks'][$file] = array();
         }
-        
+
         $attributes = array('task' => $task);
         $taskNS = 'http://pear.php.net/dtd/tasks-1.0';
         switch ($task) {
@@ -262,18 +252,18 @@ class PEARPackageFilev2
         }
         $this->info['tasks'][$file][] = $attributes;
     }
-    
+
     /**
      * Optional Dependency Groups not supported right now
-     * 
+     *
      */
-    protected function _parseDeps()
+    protected function parseDeps()
     {
         $r = $this->xml;
-        
+
         // required or optional
         $dep_type = null;
-        
+
         while ($r->read()) {
             if ($r->nodeType == \XMLReader::ELEMENT) {
                 switch ($r->localName) {
@@ -281,51 +271,44 @@ class PEARPackageFilev2
                     case 'required':
                         $dep_type = $r->localName;
                         break;
-                        
                     case 'php':
-                        $this->_parseDepPhp($dep_type);
+                        $this->parseDepPhp($dep_type);
                         break;
-
                     case 'pearinstaller':
-                        $this->_parseDepPEARInstaller($dep_type);
+                        $this->parseDepPearInstaller($dep_type);
                         break;
-                        
                     case 'package':
                     case 'subpackage':
-                        $this->_parseDepPackage($dep_type, $r->localName);
+                        $this->parseDepPackage($dep_type, $r->localName);
                         break;
-                    
                     case 'extension':
-                        $this->_parseDepExtension($dep_type);
+                        $this->parseDepExtension($dep_type);
                         break;
-
                     case 'os':
-                        $this->_parseDepOs($dep_type);
+                        $this->parseDepOs($dep_type);
                         break;
-
                     case 'arch':
-                        $this->_parseDepArch($dep_type);
+                        $this->parseDepArch($dep_type);
                         break;
-                                            
                     default:
                         // not handling dependency groups presently
                 }
             }
-                        
+
             if ($r->nodeType == \XMLReader::END_ELEMENT && $r->localName == 'dependencies') {
                 break;
             }
         }
     }
-    
-    protected function _parseDepPhp($dep_type)
+
+    protected function parseDepPhp($dep_type)
     {
         if ($dep_type == 'installconditions') {
             $dep_or_installcondition = $dep_type;
         } else {
             $dep_or_installcondition = 'dep';
         }
-        
+
         $r = $this->xml;
         $php = array(
             "$dep_or_installcondition" => 'php',
@@ -334,23 +317,23 @@ class PEARPackageFilev2
             'recommended' => null,
             'exclude' => null
         );
-        
+
         while ($r->read()) {
             if ($r->nodeType == \XMLReader::ELEMENT) {
                 if ($r->localName == 'exclude') {
                     if ($php['exclude'] === null) {
                         $php['exclude'] = array();
                     }
-                    $php['exclude'][] = $this->_getValue();
+                    $php['exclude'][] = $this->getValue();
                 } else {
-                    $php[$r->localName] = $this->_getValue();
+                    $php[$r->localName] = $this->getValue();
                 }
             }
             if ($r->nodeType == \XMLReader::END_ELEMENT && $r->localName == 'php') {
                 break;
             }
         }
-        
+
         if ($dep_or_installcondition == 'dep') {
             $this->info['dependencies'][$dep_type][] = $php;
         } else {
@@ -358,7 +341,7 @@ class PEARPackageFilev2
         }
     }
 
-    protected function _parseDepPEARInstaller($dep_type)
+    protected function parseDepPearInstaller($dep_type)
     {
         $r = $this->xml;
         $pear = array(
@@ -368,16 +351,16 @@ class PEARPackageFilev2
             'recommended' => null,
             'exclude' => null
         );
-        
+
         while ($r->read()) {
             if ($r->nodeType == \XMLReader::ELEMENT) {
                 if ($r->localName == 'exclude') {
                     if ($pear['exclude'] === null) {
                         $pear['exclude'] = array();
                     }
-                    $pear['exclude'][] = $this->_getValue();
+                    $pear['exclude'][] = $this->getValue();
                 } else {
-                    $pear[$r->localName] = $this->_getValue();
+                    $pear[$r->localName] = $this->getValue();
                 }
             }
             if ($r->nodeType == \XMLReader::END_ELEMENT && $r->localName == 'pearinstaller') {
@@ -386,8 +369,8 @@ class PEARPackageFilev2
         }
         $this->info['dependencies'][$dep_type][] = $pear;
     }
-    
-    protected function _parseDepPackage($dep_type, $pkg_type)
+
+    protected function parseDepPackage($dep_type, $pkg_type)
     {
         $r = $this->xml;
         $elements = array(
@@ -409,11 +392,11 @@ class PEARPackageFilev2
                     if ($elements['exclude'] === null) {
                         $elements['exclude'] = array();
                     }
-                    $elements['exclude'][] = $this->_getValue();
+                    $elements['exclude'][] = $this->getValue();
                 } elseif ($r->localName == 'conflicts') {
                     $elements['conflicts'] = true;
                 } else {
-                    $elements[$r->localName] = $this->_getValue();
+                    $elements[$r->localName] = $this->getValue();
                 }
             }
             if ($r->nodeType == \XMLReader::END_ELEMENT && $r->localName == $pkg_type) {
@@ -423,14 +406,14 @@ class PEARPackageFilev2
         $this->info['dependencies'][$dep_type][] = $elements;
     }
 
-    protected function _parseDepExtension($dep_type)
+    protected function parseDepExtension($dep_type)
     {
         if ($dep_type == 'installconditions') {
             $dep_or_installcondition = $dep_type;
         } else {
             $dep_or_installcondition = 'dep';
         }
-        
+
         $r = $this->xml;
         $elements = array(
             "$dep_or_installcondition" => 'extension',
@@ -448,18 +431,18 @@ class PEARPackageFilev2
                     if ($elements['exclude'] === null) {
                         $elements['exclude'] = array();
                     }
-                    $elements['exclude'][] = $this->_getValue();
+                    $elements['exclude'][] = $this->getValue();
                 } elseif ($r->localName == 'conflicts') {
                     $elements['conflicts'] = true;
                 } else {
-                    $elements[$r->localName] = $this->_getValue();
+                    $elements[$r->localName] = $this->getValue();
                 }
             }
             if ($r->nodeType == \XMLReader::END_ELEMENT && $r->localName == 'extension') {
                 break;
             }
         }
-        
+
         if ($dep_or_installcondition == 'dep') {
             $this->info['dependencies'][$dep_type][] = $elements;
         } else {
@@ -467,7 +450,7 @@ class PEARPackageFilev2
         }
     }
 
-    protected function _parseDepOs($dep_type)
+    protected function parseDepOs($dep_type)
     {
         if ($dep_type == 'installconditions') {
             $dep_or_installcondition = $dep_type;
@@ -487,14 +470,14 @@ class PEARPackageFilev2
                 if ($r->localName == 'conflicts') {
                     $elements['conflicts'] = true;
                 } else {
-                    $elements[$r->localName] = $this->_getValue();
+                    $elements[$r->localName] = $this->getValue();
                 }
             }
             if ($r->nodeType == \XMLReader::END_ELEMENT && $r->localName == 'os') {
                 break;
             }
         }
-        
+
         if ($dep_or_installcondition == 'dep') {
             $this->info['dependencies'][$dep_type][] = $elements;
         } else {
@@ -502,7 +485,7 @@ class PEARPackageFilev2
         }
     }
 
-    protected function _parseDepArch($dep_type)
+    protected function parseDepArch($dep_type)
     {
         if ($dep_type == 'installconditions') {
             $dep_or_installcondition = $dep_type;
@@ -522,22 +505,22 @@ class PEARPackageFilev2
                 if ($r->localName == 'conflicts') {
                     $elements['conflicts'] = true;
                 } else {
-                    $elements[$r->localName] = $this->_getValue();
+                    $elements[$r->localName] = $this->getValue();
                 }
             }
             if ($r->nodeType == \XMLReader::END_ELEMENT && $r->localName == 'arch') {
                 break;
             }
         }
-        
+
         if ($dep_or_installcondition == 'dep') {
             $this->info['dependencies'][$dep_type][] = $elements;
         } else {
             return $elements;
         }
     }
-    
-    protected function _parsePhpRelease()
+
+    protected function parsePhpRelease()
     {
         $ic = 'installconditions'; // so ... many ... letters ...
         $rel = array(
@@ -555,22 +538,22 @@ class PEARPackageFilev2
                     if ($r->nodeType == \XMLReader::ELEMENT) {
                         switch ($r->localName) {
                             case 'php':
-                                $php = $this->_parseDepPhp($ic);
+                                $php = $this->parseDepPhp($ic);
                                 unset($php[$ic]);
                                 $rel[$ic]['php'] = $php;
                                 break;
                             case 'os':
-                                $os = $this->_parseDepOs($ic);
+                                $os = $this->parseDepOs($ic);
                                 unset($os[$ic]);
                                 $rel[$ic]['os'] = $os;
                                 break;
                             case 'arch':
-                                $arch = $this->_parseDepArch($ic);
+                                $arch = $this->parseDepArch($ic);
                                 unset($arch[$ic]);
                                 $rel[$ic]['arch'] = $arch;
                                 break;
                             case 'extension':
-                                $ext = $this->_parseDepExtension($ic);
+                                $ext = $this->parseDepExtension($ic);
                                 unset($ext[$ic]);
                                 if (! array_key_exists('extension', $rel[$ic])) {
                                     $rel[$ic]['extension'] = array();
@@ -603,13 +586,14 @@ class PEARPackageFilev2
                     }
                     if ($r->nodeType == \XMLReader::END_ELEMENT && $r->localName == 'filelist') {
                         break;
-                    }                                
+                    }
                 }
             }
             if ($r->nodeType == \XMLReader::END_ELEMENT && $r->localName == 'phprelease') {
                 break;
-            }            
+            }
         }
         $this->info['phprelease'][] = $rel;
     }
 }
+

@@ -4,7 +4,7 @@
  *
  * Generated using:
  * phpab --var namespace=Conductor --template Conductor/Autoload.php.in --output Conductor/Autoload.php Conductor
- * 
+ *
  * @copyright 2012 Clay Loveless <clay@php.net>
  * @license   http://claylo.mit-license.org/2012/ MIT License
  */
@@ -14,32 +14,32 @@ class Autoload
 {
     /**
      * Whether or not we've been registered already
-     * 
+     *
      * @var bool
      */
     protected static $registered = false;
-    
+
     /**
      * Class map
-     * 
+     *
      * @var array
      */
     protected static $classes = array();
-    
+
     /**
      * File path
-     * 
+     *
      * @var string
      */
     protected static $path;
-    
+
     /**
      * Loader using classmap
-     * 
+     *
      */
     public static function load($class)
     {
-    
+
         if (empty(self::$classes)) {
             self::$classes = array(
                 'conductor\\autoload' => '/Autoload.php',
@@ -49,16 +49,16 @@ class Autoload
                 'conductor\\util\\pearpackagefilev2' => '/Util/PEARPackageFilev2.php'
             );
         }
-        
+
         $cn = strtolower($class);
         if (isset(self::$classes[$cn])) {
             require __DIR__ . self::$classes[$cn];
         }
     }
-    
+
     /**
      * Register autoload class with spl_autoload_register
-     * 
+     *
      * @return void
      */
     public static function register()
@@ -74,6 +74,7 @@ class Autoload
             }
         }
         self::$registered = true;
-    }    
+    }
 }
 Autoload::register();
+

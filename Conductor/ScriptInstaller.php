@@ -48,3 +48,4 @@ class ScriptInstaller extends LibraryInstaller
         return 'conductor-script' === $packageType;
     }
 }
+
