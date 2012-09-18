@@ -46,6 +46,8 @@ class Package2XmlToComposer
     protected $_include_path = array();
     protected $_bin_files;
     protected $_config;
+    protected $_write_version_to_composer = true;
+    protected $_write_time_to_composer = true;
     public $output_file = true;
     protected $_package2file_path;
     
@@ -132,6 +134,14 @@ class Package2XmlToComposer
         
         if (isset($this->_config['bin'])) {
             $this->setBinFiles($this->_config['bin']);
+        }
+        
+        if (isset($this->_config['version']) && $this->_config['version'] === false) {
+            $this->_write_version_to_composer = false;
+        }
+
+        if (isset($this->_config['time']) && $this->_config['time'] === false) {
+            $this->_write_time_to_composer = false;
         }
         
         if (isset($this->_config['output_path'])) {
@@ -238,6 +248,31 @@ EOF;
     public function setType($type)
     {
         $this->_type = strval($type);
+        return $this;
+    }
+
+    /**
+     * Should version information from package.xml be written to composer.json?
+     * 
+     * @param bool
+     * @return self
+     */
+    public function writeVersionToComposer($bool)
+    {
+        $this->_write_version_to_composer = (bool) $bool;
+        return $this;
+    }
+
+    /**
+     * Should release date/time information from package.xml be written to 
+     * composer.json?
+     * 
+     * @param bool
+     * @return self
+     */
+    public function writeTimeToComposer($bool)
+    {
+        $this->_write_time_to_composer = (bool) $bool;
         return $this;
     }
     
@@ -472,10 +507,10 @@ EOF;
         }
         $j .= $tab . "],\n";
 
-        if (isset($this->_data['version']['release'])) {
+        if (isset($this->_data['version']['release']) && $this->_write_version_to_composer) {
             $j .= $tab . '"version": "'. $this->_data['version']['release'] . "\",\n";
         }
-        if (isset($this->_data['date'])) {
+        if (isset($this->_data['date']) && $this->_write_time_to_composer) {
             $j .= $tab . '"time": "'. $this->_data['date'] . "\",\n";
         }
 
