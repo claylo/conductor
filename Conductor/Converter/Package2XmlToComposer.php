@@ -533,6 +533,11 @@ EOF;
         if (! empty($this->_bin_files)) {
             $j .= $tab . "\"bin\": [\n";
             foreach ($this->_bin_files as $file) {
+                // composer creates its own .bat wrapper, so skip this.
+                // @see https://github.com/sebastianbergmann/phpunit/pull/648
+                if (substr($file, -4) == '.bat') {
+                    continue;
+                }
                 $j .= $tab . $tab . "\"$file\",\n";
             }
             $j = rtrim($j, ",\n") . "\n";
