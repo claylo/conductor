@@ -85,7 +85,7 @@ class PEARPackageFilev2
                     case 'developer':
                     case 'contributor':
                     case 'helper':
-                        $this->info[$r->localName][] = $this->_getPerson($r->localName);
+                        $this->info[$r->localName][] = $this->getPerson($r->localName);
                         break;
                     case 'version':
                     case 'stability':

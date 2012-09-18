@@ -48,6 +48,8 @@ class Package2XmlToComposer
     protected $config;
     protected $write_version_to_composer = true;
     protected $write_time_to_composer = true;
+    protected $branch_alias;
+    protected $extra;
     public $output_file = true;
     protected $package2file_path;
 
@@ -81,7 +83,7 @@ class Package2XmlToComposer
      *   bin
      *
      * Non-composer.json-standard values:
-     * depedency_map:
+     * dependency_map:
      * dependency_map allows mapping of PEAR package dependencies to their
      * composer equivalents.
      *
@@ -119,6 +121,9 @@ class Package2XmlToComposer
         if (isset($this->config['extra_suggestions'])) {
             $this->setExtraSuggestions($this->config['extra_suggestions']);
         }
+        if (isset($this->config['extra-suggestions'])) {
+            $this->setExtraSuggestions($this->config['extra-suggestions']);
+        }
 
         if (isset($this->config['support'])) {
             $this->setSupportInfo($this->config['support']);
@@ -131,6 +136,9 @@ class Package2XmlToComposer
         if (isset($this->config['include_path'])) {
             $this->setIncludePath($this->config['include_path']);
         }
+        if (isset($this->config['include-path'])) {
+            $this->setIncludePath($this->config['include-path']);
+        }
 
         if (isset($this->config['bin'])) {
             $this->setBinFiles($this->config['bin']);
@@ -142,6 +150,19 @@ class Package2XmlToComposer
 
         if (isset($this->config['time']) && $this->config['time'] === false) {
             $this->write_time_to_composer = false;
+        }
+
+        if (isset($this->config['branch_alias'])) {
+            $this->setBranchAlias($this->config['branch_alias']);
+        }
+        if (isset($this->config['branch-alias'])) {
+            $this->setBranchAlias($this->config['branch-alias']);
+        }
+
+        if (isset($this->config['extra'])) {
+            // extra voids any branch alias, need to pass it IN extra
+            $this->branch_alias = null;
+            $this->setExtra($this->config['extra']);
         }
 
         if (isset($this->config['output_path'])) {
@@ -372,6 +393,31 @@ EOF;
     public function setAutoload($config)
     {
         $this->autoload = (array) $config;
+        return $this;
+    }
+
+    /**
+     * Set up any branch-alias that may be specified
+     *
+     * @param array $config
+     * @return self
+     */
+    public function setBranchAlias($aliases)
+    {
+        $this->branch_alias = (array) $aliases;
+        return $this;
+    }
+
+    /**
+     * Set the entire 'extra' array
+     *
+     * @see http://getcomposer.org/doc/04-schema.md#extra
+     * @param array $config
+     * @return self
+     */
+    public function setExtra($extra)
+    {
+        $this->extra = (array) $extra;
         return $this;
     }
 
@@ -609,6 +655,29 @@ EOF;
                 }
             }
             $j = rtrim($j, ",\n") . "\n";
+            $j .= $tab . "},\n";
+        }
+
+        if (! empty($this->extra)) {
+            $j .= $tab . "\"extra\": {\n";
+            foreach ($this->extra as $key => $val) {
+                if (! is_array($val)) {
+                    $j .= $tab . $tab . "\"$key\": \"$val\",\n";
+                } else {
+                    $v = json_encode($val);
+                    $j .= $tab . $tab . "\"$key\": $v,\n";
+                }
+            }
+            $j = rtrim($j, ",\n") . "\n";
+            $j .= $tab . "},\n";
+        } elseif (! empty($this->branch_alias)) {
+            $j .= $tab . "\"extra\": {\n";
+            $j .= $tab . $tab . "\"branch-alias\": {\n";
+            foreach ($this->branch_alias as $key => $val) {
+                $j .= $tab . $tab . $tab . "\"$key\": \"$val\"\n,";
+            }
+            $j = rtrim($j, ",\n") . "\n";
+            $j .= $tab . $tab . "}\n";
             $j .= $tab . "},\n";
         }
 

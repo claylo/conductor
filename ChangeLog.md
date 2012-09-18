@@ -6,6 +6,17 @@ Planned items for Conductor 1.1.0
 * Common install script behaviors/wrappers
 * Refinements to converter, as needed
 
+Conductor 1.0.4
+---------------
+
+* PEAR Converter: added support for optionally disabling 'version' and 'time'
+  from composer output.
+* PEAR Converter: removed any .bat executables for 'bin', since Composer 
+  has special handling for those already.
+* PEAR Converter: added ability to specify 'branch-alias' *OR* entire 'extra'
+  array.
+* Code cleanups for PSR-2
+
 Conductor 1.0.3
 ---------------
 
