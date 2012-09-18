@@ -418,13 +418,6 @@ EOF;
         }
         $j .= $tab . "],\n";
 
-        if (isset($data['version']['release'])) {
-            $j .= $tab . '"version": "'. $data['version']['release'] . "\",\n";
-        }
-        if (isset($data['date'])) {
-            $j .= $tab . '"time": "'. $data['date'] . "\",\n";
-        }
-
         if (! empty($this->_support)) {
             $j .= $tab . "\"support\": {\n";
             foreach ($this->_support as $key => $val) {
