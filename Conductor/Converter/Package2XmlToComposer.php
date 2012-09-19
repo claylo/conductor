@@ -56,7 +56,7 @@ class Package2XmlToComposer
         if (! file_exists($package2file)) {
             throw new \RuntimeException('Could not find ' . $package2file);
         }
-        $this->package2file_path = $packcage2file;
+        $this->package2file_path = $package2file;
         $this->xml = file_get_contents($package2file);
 
         if ($config !== null && file_exists($config)) {
